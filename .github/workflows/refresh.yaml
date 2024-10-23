@@ -1,0 +1,37 @@
+name: Update Clash YAML
+
+on:
+  schedule:
+    - cron: '40 */6 * * *'  # 每6小时40min运行一次
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  update-yaml:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          architecture: "x64"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: |
+          pip3 install -r requirements.txt
+
+      - name: Run update script
+        env:
+          GIST_OLD_LINK: ${{ secrets.GIST_OLD_LINK }}  # 源文件的gist链接
+          GIST_LINK: ${{ secrets.GIST_LINK }}          # 目标文件的gist链接
+          GIST_PAT: ${{ secrets.GIST_PAT }}
+        run: |
+          echo "Running update script..."
+          python convert.py
+          echo "Update script completed."
+
+      - name: Timestamp
+        run: date
